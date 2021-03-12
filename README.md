@@ -7,4 +7,5 @@ This script takes two pictures: the texture and the scene.
 - The scene is a 3D image in which one wishes to project the texture.
 
 Here's an example:
-![resulting image](images/result.png)
+
+![resulting image](images/result.jpg)
