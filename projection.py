@@ -127,3 +127,4 @@ if __name__ == '__main__':
 				scene.putpixel(pixel, texture)
 
 	scene.show()
+	scene.save('images/result.jpg')
