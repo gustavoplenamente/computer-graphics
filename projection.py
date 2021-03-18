@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from PIL import Image
 
@@ -104,18 +106,70 @@ def print_px(x, y):
 	print(f"x: {x},   y: {y}")
 
 
+def handle_input():
+	if len(sys.argv) != 3:
+		print("Usage: projection.py <texture_path> <scene_path>")
+		exit()
+
+	texture_path = sys.argv[1]
+	scene_path = sys.argv[2]
+
+	texture = Image.open(texture_path)
+	scene = Image.open(scene_path)
+
+	texture_width, texture_height = texture.size
+	texture_pixels = []
+	scene_pixels = []
+
+	while True:
+		print("Do you want to project the whole texture onto the scene? (y/n)")
+		answer = input()
+
+		if answer == 'y':
+			texture_pixels = [
+				(0, 0), 
+				(texture_width-1, 0), 
+				(0, texture_height-1), 
+				(texture_width-1, texture_height-1)
+			]
+
+			break
+		elif answer == 'n':
+			print("Enter the coordinates of the texture quadrilateral vertices.")
+			set_pixels(texture_pixels)
+
+			break
+		else:
+			print("Answer must be 'y' or 'n'.")
+
+
+	print("Enter the coordinates of the scene quadrilateral vertices.")
+	set_pixels(scene_pixels)
+
+	return texture, texture_pixels, scene, scene_pixels
+
+
+def set_pixels(pixels):
+	set_pixel_input(pixels, "Upper left vertex")
+	set_pixel_input(pixels, "Upper right vertex")
+	set_pixel_input(pixels, "Bottom left vertex")
+	set_pixel_input(pixels, "Bottom right vertex")
+
+
+def set_pixel_input(pixels, pixel_name):
+	print(pixel_name)
+	pixel = (int(input("X: ")), int(input("Y: ")))
+	pixels.append(pixel)
+
+
 if __name__ == '__main__':
-	image = Image.open("images/nutella.jpg")
-	scene = Image.open("images/art-museum.jpg")
+	texture, texture_pixels, scene, target_pixels = handle_input()
 
-	width, height = image.size
-
-	target_pixels = ((54, 161), (154, 172), (53, 310), (152, 299))
-	source_pixels = ((0, 0), (width-1, 0), (0, height-1), (width-1, height-1))
-
-	inv_h = get_inv_h(source_pixels, target_pixels)
-
+	width, height = texture.size
 	scene_width, scene_height = scene.size
+
+	inv_h = get_inv_h(texture_pixels, target_pixels)
+
 	scene_pixels = scene.load()
 
 	for x in range(scene_width):
@@ -123,8 +177,8 @@ if __name__ == '__main__':
 			pixel = (x, y)
 
 			if should_replace(pixel, target_pixels):
-				texture = get_texture(pixel, inv_h, image)
-				scene.putpixel(pixel, texture)
+				texture_color = get_texture(pixel, inv_h, texture)
+				scene.putpixel(pixel, texture_color)
 
 	scene.show()
 	scene.save('images/result.jpg')
